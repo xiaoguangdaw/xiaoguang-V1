@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>小光 V1</title>
+<style>
+:root{
+--glass:rgba(255,255,255,0.14);
+--glass-border:rgba(255,255,255,0.28);
+--blur:blur(22px) saturate(180%);
+--txt:#F5F7FB;
+--sub:rgba(245,247,251,0.62);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+background:linear-gradient(160deg,#0B1020 0%,#152046 45%,#2A1B4D 100%);
+color:var(--txt);
+position:relative;
+}
+.bgblob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.55;pointer-events:none;z-index:0}
+.b1{width:280px;height:280px;background:#3B82F6;top:-70px;left:-60px}
+.b2{width:240px;height:240px;background:#A855F7;bottom:40px;right:-70px}
+.b3{width:200px;height:200px;background:#06B6D4;top:40%;left:60%}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+.topbar{
+padding:calc(env(safe-area-inset-top) + 14px) 18px 10px;
+display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-size:20px;font-weight:800;letter-spacing:.5px}
+.brand small{font-size:11px;opacity:.6;font-weight:500;margin-left:6px}
+.page{flex:1;overflow-y:auto;padding:6px 16px 100px;-webkit-overflow-scrolling:touch}
+.page::-webkit-scrollbar{display:none}
+.card{
+background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+border:1px solid var(--glass-border);border-radius:22px;padding:16px;
+box-shadow:0 8px 32px rgba(0,0,0,.25);margin-bottom:14px;
+}
+.card h3{font-size:14px;opacity:.75;font-weight:600;margin-bottom:12px;letter-spacing:.3px}
+.row{display:flex;align-items:center;justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini{background:rgba(255,255,255,.08);border-radius:16px;padding:12px;text-align:center}
+.mini .v{font-size:17px;font-weight:700;margin-top:4px}
+.mini .k{font-size:11px;opacity:.6}
+button{font-family:inherit}
+.btn{
+width:100%;padding:13px;border:none;border-radius:16px;
+background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#fff;
+font-size:15px;font-weight:700;cursor:pointer;transition:.2s;
+}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn.ghost{background:rgba(255,255,255,.12);border:1px solid var(--glass-border)}
+input,textarea{
+width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--glass-border);
+background:rgba(255,255,255,.08);color:var(--txt);font-size:15px;outline:none;
+font-family:inherit;
+}
+input::placeholder,textarea::placeholder{color:rgba(245,247,251,.4)}
+</style>
+</head>
+<body>
+<div class="bgblob b1"></div><div class="bgblob b2"></div><div class="bgblob b3"></div>
+<!--CSS_PART2-->
+<style>
+.tabbar{
+position:fixed;bottom:0;left:0;right:0;z-index:20;
+display:flex;padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);
+background:rgba(15,20,40,.55);backdrop-filter:blur(24px) saturate(180%);
+-webkit-backdrop-filter:blur(24px) saturate(180%);
+border-top:1px solid rgba(255,255,255,.14);
+}
+.tab{flex:1;text-align:center;padding:6px 0;opacity:.5;cursor:pointer;transition:.2s}
+.tab.on{opacity:1;transform:translateY(-2px)}
+.tab .ic{font-size:20px;display:block;line-height:1.2}
+.tab .tx{font-size:10px;margin-top:2px}
+.hide{display:none!important}
+.list-item{
+background:rgba(255,255,255,.08);border-radius:14px;padding:12px 14px;margin-bottom:8px;
+display:flex;justify-content:space-between;align-items:center;font-size:14px;
+}
+.gamegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gamecard{
+background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+border:1px solid var(--glass-border);border-radius:20px;padding:18px 12px;text-align:center;cursor:pointer;
+transition:.2s;
+}
+.gamecard:active{transform:scale(.95)}
+.gamecard .gi{font-size:30px}
+.gamecard .gn{font-size:13px;font-weight:700;margin-top:8px}
+.gamecard .gd{font-size:10px;opacity:.5;margin-top:3px}
+#gameStage{
+position:fixed;inset:0;z-index:99;background:#0B1020;display:none;flex-direction:column;
+}
+#gameStage.on{display:flex}
+.ghead{padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1)}
+.gbody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;overflow:auto}
+canvas{border-radius:14px;background:rgba(255,255,255,.06);touch-action:none;max-width:100%}
+.score{font-size:15px;font-weight:700}
+.seg{display:flex;background:rgba(255,255,255,.1);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;padding:7px 10px;border:none;background:transparent;color:var(--txt);border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.seg button.on{background:rgba(255,255,255,.9);color:#111}
+.barwrap{height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-top:6px}
+.barfill{height:100%;background:linear-gradient(90deg,#3B82F6,#8B5CF6);border-radius:3px}
+.rainitem{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}
+.rainitem:last-child{border-bottom:none}
+.rainitem .hh{width:48px;opacity:.7}
+.rainitem .ii{width:26px;text-align:center;font-size:17px}
+.rainitem .tt{width:52px;text-align:right;font-weight:700}
+.rainitem .pp{flex:1;text-align:right;font-size:12px;opacity:.75}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(255,255,255,.16)}
+.bigtip{padding:18px;border-radius:18px;text-align:center;margin-bottom:14px}
+.bigtip .t1{font-size:24px;font-weight:900}
+.bigtip .t2{font-size:12px;opacity:.8;margin-top:6px}
+.noteitem{background:rgba(255,255,255,.08);border-radius:14px;padding:12px 14px;margin-bottom:10px;position:relative}
+.noteitem .nt{font-size:14px;font-weight:700;margin-bottom:5px}
+.noteitem .nc{font-size:12.5px;opacity:.72;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.noteitem .nd{font-size:10px;opacity:.45;margin-top:7px}
+.noteitem .del{position:absolute;top:10px;right:12px;font-size:16px;opacity:.5;cursor:pointer}
+.avatar{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#A855F7);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(59,130,246,.45)}
+.center{text-align:center}
+.lvlbar{height:8px;background:rgba(255,255,255,.14);border-radius:4px;overflow:hidden;margin-top:10px}
+.lvlfill{height:100%;background:linear-gradient(90deg,#F59E0B,#EF4444);width:0;transition:width .8s}
+</style>
+<!--BODY_PART-->
+<div id="app">
+<div class="topbar">
+<div class="brand">小光 V1<small id="fontTag">中文</small></div>
+<div id="clock" style="font-size:12px;opacity:.6"></div>
+</div>
+
+<div id="p-weather" class="page">
+<div class="card" id="wxNow"></div>
+<div class="card" id="wxTip"></div>
+<div class="card"><h3>未来 24 小时 · 逐时</h3><div id="wxHourly"></div></div>
+<div class="card"><h3>今日各项建议</h3><div id="wxAdvice" class="grid2"></div></div>
+<div class="card"><h3>近 30 天趋势</h3><div id="wxTrend"></div></div>
+</div>
+
+<div id="p-notes" class="page hide">
+<div class="card">
+<h3>新建记事</h3>
+<input id="noteTitle" placeholder="标题…" style="margin-bottom:10px">
+<textarea id="noteBody" rows="3" placeholder="写点什么…"></textarea>
+<button class="btn" style="margin-top:10px" onclick="addNote()">保存记事</button>
+</div>
+<div class="card"><h3>我的记事（<span id="noteCount">0</span>）</h3><div id="noteList"></div></div>
+</div>
+
+<div id="p-games" class="page hide">
+<div class="card"><h3>游戏大厅 · 8 款</h3><div class="gamegrid" id="gameGrid"></div></div>
+</div>
+
+<div id="p-account" class="page hide">
+<div class="card">
+<div class="avatar" id="avaEmoji">🙂</div>
+<div class="center">
+<input id="nick" placeholder="输入昵称" style="text-align:center;margin-bottom:10px">
+<input id="sign" placeholder="个性签名…" style="text-align:center">
+<button class="btn" style="margin-top:12px" onclick="saveAccount()">保存资料</button>
+<button class="btn ghost" style="margin-top:8px" onclick="doLogin()">一键登录（动画）</button>
+</div>
+<div class="lvlbar"><div class="lvlfill" id="lvlFill"></div></div>
+<div class="center" style="font-size:12px;opacity:.7;margin-top:8px">Lv.<span id="lvlNum">1</span> · 经验值 <span id="expNum">0</span>/100</div>
+</div>
+<div class="card"><h3>账号信息</h3><div id="accInfo"></div></div>
+</div>
+
+<div id="p-set" class="page hide">
+<div class="card">
+<h3>字体风格</h3>
+<div class="seg" id="fontSeg">
+<button class="on" data-f="cn" onclick="setFont(\"cn\")">中文</button>
+<button data-f="en" onclick="setFont(\"en\")">English</button>
+<button data-f="fun" onclick="setFont(\"fun\")">搞笑幽默</button>
+</div>
+</div>
+<div class="card"><h3>关于</h3><div style="font-size:13px;line-height:1.9;opacity:.82">
+<div>软件名：小光 V1</div>
+<div>包名：com.auto.xiaoguang</div>
+<div>版本：1.0</div>
+<div>风格：iOS 玻璃拟态</div>
+<div>数据：全部保存在本机，不上传任何服务器</div>
+</div></div>
+<div class="card"><button class="btn ghost" onclick="clearAll()">清除全部本机数据</button></div>
+</div>
+
+<div id="p-about" class="page hide">
+<div class="card"><h3>简介</h3><div style="font-size:13px;line-height:2;opacity:.85">
+<div>🌤 天气：24 小时逐时预报、降雨概率、带伞建议、30 天趋势</div>
+<div>📝 记事本：本地保存，随时增删</div>
+<div>🎮 游戏：8 款小游戏，点击即玩</div>
+<div>👤 账号：纯本地假登录，好看而已</div>
+<div>🔤 字体：中文 / English / 搞笑幽默</div>
+</div></div>
+</div>
+</div>
+<!--NAV_PART-->
+<div class="tabbar" id="tabbar">
+<div class="tab on" data-p="weather" onclick="go(\"weather\")"><span class="ic">🌤</span><span class="tx">天气</span></div>
+<div class="tab" data-p="notes" onclick="go(\"notes\")"><span class="ic">📝</span><span class="tx">记事本</span></div>
+<div class="tab" data-p="games" onclick="go(\"games\")"><span class="ic">🎮</span><span class="tx">游戏</span></div>
+<div class="tab" data-p="account" onclick="go(\"account\")"><span class="ic">👤</span><span class="tx">账号</span></div>
+<div class="tab" data-p="set" onclick="go(\"set\")"><span class="ic">⚙️</span><span class="tx">设置</span></div>
+</div>
+
+<div id="gameStage">
+<div class="ghead">
+<div class="score" id="gTitle">游戏</div>
+<div>
+<button class="btn ghost" style="width:auto;padding:7px 16px;font-size:13px" onclick="closeGame()">关闭</button>
+</div>
+</div>
+<div class="gbody" id="gBody"></div>
+</div>
+<!--JS_PART-->
+<!--BODY_END-->
+<script>
+var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+function go(p){
+  var pages=["weather","notes","games","account","set","about"];
+  for(var i=0;i<pages.length;i++){var el=document.getElementById("p-"+pages[i]);if(el){if(pages[i]===p){el.classList.remove("hide")}else{el.classList.add("hide")}}}
+  var tabs=document.querySelectorAll(".tab");
+  for(var j=0;j<tabs.length;j++){if(tabs[j].getAttribute("data-p")===p){tabs[j].classList.add("on")}else{tabs[j].classList.remove("on")}}
+}
+
+var FONTS={
+  cn:{css:"-apple-system, \"PingFang SC\", \"Microsoft YaHei\", sans-serif",tag:"中文"},
+  en:{css:"Georgia, \"Times New Roman\", serif",tag:"English"},
+  fun:{css:"\"Comic Sans MS\", \"Chalkboard SE\", \"Yuanti SC\", cursive",tag:"搞笑幽默"}
+};
+function setFont(f){
+  var cfg=FONTS[f]||FONTS.cn;
+  document.body.style.fontFamily=cfg.css;
+  document.getElementById("fontTag").textContent=cfg.tag;
+  var bs=document.querySelectorAll("#fontSeg button");
+  for(var i=0;i<bs.length;i++){if(bs[i].getAttribute("data-f")===f){bs[i].classList.add("on")}else{bs[i].classList.remove("on")}}
+  LS.set("xg_font",f);
+  if(f==="fun"){document.body.style.letterSpacing="0.3px"}else{document.body.style.letterSpacing="0"}
+}
+
+function tick(){
+  var d=new Date();
+  var p=function(n){return n<10?"0"+n:""+n};
+  var el=document.getElementById("clock");
+  if(el){el.textContent=p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds())}
+}
+setInterval(tick,1000);
+
+/* ---------- 记事本 ---------- */
+function getNotes(){return LS.get("xg_notes",[])}
+function renderNotes(){
+  var arr=getNotes();
+  var box=document.getElementById("noteList");
+  var cnt=document.getElementById("noteCount");
+  if(cnt){cnt.textContent=arr.length}
+  if(!box){return}
+  if(arr.length===0){box.innerHTML="<div style=\"font-size:12px;opacity:.5;text-align:center;padding:14px\">还没有记事，上去写一条吧~</div>";return}
+  var h="";
+  for(var i=0;i<arr.length;i++){
+    var n=arr[i];
+    h+="<div class=\"noteitem\"><div class=\"del\" onclick=\"delNote("+i+")\">✕</div><div class=\"nt\">"+esc(n.t)+"</div><div class=\"nc\">"+esc(n.c)+"</div><div class=\"nd\">"+n.d+"</div></div>";
+  }
+  box.innerHTML=h;
+}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function addNote(){
+  var t=document.getElementById("noteTitle").value.trim();
+  var c=document.getElementById("noteBody").value.trim();
+  if(!t&&!c){alert("写点内容再保存吧");return}
+  var arr=getNotes();
+  var d=new Date();
+  arr.unshift({t:t||"无标题",c:c,d:d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+" "+d.getHours()+":"+d.getMinutes()});
+  LS.set("xg_notes",arr);
+  document.getElementById("noteTitle").value="";
+  document.getElementById("noteBody").value="";
+  renderNotes();
+  addExp(2);
+}
+function delNote(i){
+  var arr=getNotes();
+  if(i<0||i>=arr.length){return}
+  arr.splice(i,1);
+  LS.set("xg_notes",arr);
+  renderNotes();
+}
+</script>
+<!--JS_PART2-->
+<script>
+/* ---------- 天气系统（本地模拟 + 可选真实接口） ---------- */
+var WX_ICON={"晴":"☀️","多云":"⛅","阴":"☁️","小雨":"🌧️","中雨":"🌧️","大雨":"⛈️","雷阵雨":"⛈️","雪":"❄️","温":"☁️"};
+var WX_TYPES=["晴","多云","阴","小雨","中雨","雷阵雨"];
+
+function seededRand(seed){var x=Math.sin(seed)*10000;return x-Math.floor(x)}
+
+function genHourly(){
+  var now=new Date();
+  var h0=now.getHours();
+  var day=now.getDate();
+  var arr=[];
+  for(var i=0;i<24;i++){
+    var h=(h0+i)%24;
+    var s=seededRand(day*100+h*7+i);
+    var t=Math.round(18+seededRand(day*31+h)*15);
+    if(h<6){t-=4}if(h>=11&&h<=15){t+=4}
+    var rc=Math.round(seededRand(day*53+h*3+i*2)*100);
+    var ty=WX_TYPES[Math.floor(seededRand(day*17+h*5)*WX_TYPES.length)];
+    if(rc<30){ty="晴"}else if(rc<50){ty="多云"}else if(rc<65){ty="阴"}else if(rc<78){ty="小雨"}else if(rc<90){ty="中雨"}else{ty="雷阵雨"}
+    arr.push({h:h,t:t,r:rc,ty:ty});
+  }
+  return arr;
+}
+
+function genTrend(){
+  var now=new Date();
+  var arr=[];
+  for(var i=29;i>=0;i--){
+    var d=new Date(now.getTime()-i*86400000);
+    var s=seededRand(d.getDate()*13+d.getMonth()*7);
+    var hi=Math.round(22+s*12);
+    var lo=hi-Math.round(6+s*4);
+    var rain=Math.round(seededRand(d.getDate()*29+d.getMonth())*100);
+    arr.push({d:(d.getMonth()+1)+"/"+d.getDate(),hi:hi,lo:lo,rain:rain});
+  }
+  return arr;
+}
+
+function umbrella(r){
+  if(r>=70){return {txt:"一定要带伞",lv:"#EF4444",sub:"降雨概率很高，不带会湿身！"}}
+  if(r>=45){return {txt:"建议带伞",lv:"#F59E0B",sub:"随时可能下，备着安心"}}
+  if(r>=25){return {txt:"可带可不带",lv:"#06B6D4",sub:"大概率不下了，看心情"}}
+  return {txt:"不用带伞",lv:"#10B981",sub:"今天晴朗，雨伞在家休息"}
+}
+
+function renderWeather(){
+  var hr=genHourly();
+  var now=hr[0];
+  var rainToday=0;for(var i=0;i<hr.length;i++){rainToday+=hr[i].r}rainToday=Math.round(rainToday/hr.length);
+  var mx=hr[0].t,mn=hr[0].t;
+  for(var j=0;j<hr.length;j++){if(hr[j].t>mx){mx=hr[j].t}if(hr[j].t<mn){mn=hr[j].t}}
+  var ub=umbrella(rainToday);
+  var d=new Date();
+  var nowEl=document.getElementById("wxNow");
+  if(nowEl){
+    nowEl.innerHTML="<div class=\"row\"><div><div style=\"font-size:40px;font-weight:900\">"+now.t+"°</div><div style=\"font-size:14px;opacity:.75;margin-top:2px\">"+now.ty+" · 体感 "+(now.t-1)+"°</div></div><div style=\"font-size:58px\">"+(WX_ICON[now.ty]||"🌤")+"</div></div>"+
+      "<div style=\"font-size:12px;opacity:.6;margin-top:10px\">"+d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日 · 今天最高 "+mx+"° / 最低 "+mn+"°</div>"+
+      "<div class=\"grid3\" style=\"margin-top:14px\">"+
+      "<div class=\"mini\"><div class=\"k\">湿度</div><div class=\"v\">"+(40+now.r/3| 0)+"%</div></div>"+
+      "<div class=\"mini\"><div class=\"k\">风速</div><div class=\"v\">"+(2+now.r/20|0)+"m/s</div></div>"+
+      "<div class=\"mini\"><div class=\"k\">空气</div><div class=\"v\">"+(now.r<40?"优":now.r<70?"良":"轻污")+"</div></div>"+
+      "</div>";
+  }
+  var tipEl=document.getElementById("wxTip");
+  if(tipEl){
+    tipEl.innerHTML="<div class=\"bigtip\" style=\"background:rgba(255,255,255,.07);border:1px solid "+ub.lv+"55\">"+
+      "<div style=\"font-size:12px;opacity:.6\">今日降雨概率平均 "+rainToday+"%</div>"+
+      "<div class=\"t1\" style=\"color:"+ub.lv+";margin-top:6px\">"+ub.txt+"</div>"+
+      "<div class=\"t2\">"+ub.sub+"</div></div>";
+  }
+  var hEl=document.getElementById("wxHourly");
+  if(hEl){
+    var hh="";
+    for(var k=0;k<hr.length;k++){
+      var it=hr[k];
+      var hstr=(it.h<10?"0":"")+it.h+":00";
+      hh+="<div class=\"rainitem\"><div class=\"hh\">"+hstr+"</div><div class=\"ii\">"+(WX_ICON[it.ty]||"☁️")+"</div><div class=\"tt\">"+it.t+"°</div><div class=\"pp\">雨 "+it.r+"%</div></div>";
+    }
+    hEl.innerHTML=hh;
+  }
+  renderAdvice(rainToday,mx,mn,now);
+  renderTrend();
+}
+</script>
+<!--JS_PART3-->
+<script>
+function renderAdvice(rain,mx,mn,now){
+  var el=document.getElementById("wxAdvice");if(!el){return}
+  var items=[];
+  var cloth=mx>30?"短袖+防晒":mx>24?"薄外套":mx>16?"长袖薄衣":mx>8?"外套+长裤":"羽绒服";
+  items.push({k:"👕 穿衣",v:cloth});
+  items.push({k:"😷 空气",v:(rain<40?"放心出门":"可戴口罩")});
+  items.push({k:"🚗 洗车",v:(rain>55?"别洗，会白洗":"可以洗")});
+  items.push({k:"🏃 运动",v:(rain>60?"改室内":(mx>33?"避开午间":"适合运动"))});
+  items.push({k:"🧴 紫外线",v:(mx>28?"强，注意防晒":"一般")});
+  items.push({k:"💧 湿度",v:(40+now.r/3|0)+"%"});
+  var h="";
+  for(var i=0;i<items.length;i++){h+="<div class=\"mini\"><div class=\"k\">"+items[i].k+"</div><div class=\"v\" style=\"font-size:14px;margin-top:6px\">"+items[i].v+"</div></div>"}
+  el.innerHTML=h;
+}
+
+function renderTrend(){
+  var el=document.getElementById("wxTrend");if(!el){return}
+  var tr=genTrend();
+  var W=Math.max(280,tr.length*14),H=110;
+  var mx=0,mn=99;
+  for(var i=0;i<tr.length;i++){if(tr[i].hi>mx){mx=tr[i].hi}if(tr[i].lo<mn){mn=tr[i].lo}}
+  var pad=8;
+  var stepX=(W-pad*2)/(tr.length-1);
+  var pts=[];
+  for(var j=0;j<tr.length;j++){
+    var x=pad+j*stepX;
+    var y=pad+(mx-tr[j].hi)/(mx-mn+1)*(H-pad*2);
+    pts.push(x.toFixed(1)+","+y.toFixed(1));
+  }
+  var line=pts.join(" ");
+  var area="M"+pad+","+(H-pad)+" L"+line.replace(/ /g," L")+" L"+(W-pad)+","+(H-pad)+" Z";
+  var svg="<svg width=\"100%\" viewBox=\"0 0 "+W+" "+H+"\" style=\"margin-top:6px\">"+
+    "<defs><linearGradient id=\"g1\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0%\" stop-color=\"#3B82F6\" stop-opacity=\"0.55\"/><stop offset=\"100%\" stop-color=\"#3B82F6\" stop-opacity=\"0\"/></linearGradient></defs>"+
+    "<path d=\""+area+"\" fill=\"url(#g1)\"/><polyline points=\""+line+"\" fill=\"none\" stroke=\"#60A5FA\" stroke-width=\"2\"/></svg>";
+  var bars="<div style=\"display:flex;gap:2px;align-items:flex-end;height:56px;margin-top:10px\">";
+  for(var k=0;k<tr.length;k++){
+    var hp=Math.max(4,tr[k].rain/100*52);
+    var col=tr[k].rain>=70?"#EF4444":tr[k].rain>=45?"#F59E0B":tr[k].rain>=25?"#06B6D4":"#10B981";
+    bars+="<div style=\"flex:1;height:"+hp.toFixed(0)+"px;background:"+col+"88;border-radius:2px\" title=\""+tr[k].d+" 雨"+tr[k].rain+"%\"></div>";
+  }
+  bars+="</div>";
+  var txt="<div style=\"display:flex;justify-content:space-between;font-size:10px;opacity:.5;margin-top:6px\"><span>"+tr[0].d+"</span><span>"+tr[Math.floor(tr.length/2)].d+"</span><span>"+tr[tr.length-1].d+"</span></div>";
+  var summary="<div style=\"font-size:12.5px;opacity:.8;margin-top:10px;line-height:1.7\">近 30 天温度区间 "+mn+"° ~ "+mx+"°，柱状为每日降雨概率。</div>";
+  el.innerHTML=svg+bars+txt+summary;
+}
+</script>
+<!--JS_PART4-->
+<script>
+/* ---------- 账号系统（纯本地，不上传） ---------- */
+var EMOJI=["🙂","😎","🤠","🐱","🐶","🦊","🐼","🐨","🦄","🐧","👾","🤖","🌟","⚡"];
+function getAcc(){return LS.get("xg_acc",{nick:"",sign:"",exp:0,emoji:"🙂"})}
+function saveAcc(a){LS.set("xg_acc",a)}
+
+function renderAcc(){
+  var a=getAcc();
+  var nk=document.getElementById("nick");if(nk&&a.nick){nk.value=a.nick}
+  var sg=document.getElementById("sign");if(sg&&a.sign){sg.value=a.sign}
+  var ae=document.getElementById("avaEmoji");if(ae){ae.textContent=a.emoji||"🙂"}
+  var lv=Math.floor(a.exp/100)+1;
+  var ex=a.exp%100;
+  var lvN=document.getElementById("lvlNum");if(lvN){lvN.textContent=lv}
+  var exN=document.getElementById("expNum");if(exN){exN.textContent=ex}
+  var lf=document.getElementById("lvlFill");if(lf){setTimeout(function(){lf.style.width=ex+"%"},120)}
+  var info=document.getElementById("accInfo");
+  if(info){
+    info.innerHTML="<div class=\"list-item\"><span>昵称</span><b>"+esc(a.nick||"未设置")+"</b></div>"+
+      "<div class=\"list-item\"><span>签名</span><b>"+esc(a.sign||"这个人很懒")+"</b></div>"+
+      "<div class=\"list-item\"><span>等级</span><b>Lv."+lv+"</b></div>"+
+      "<div class=\"list-item\"><span>经验值</span><b>"+a.exp+"</b></div>"+
+      "<div class=\"list-item\"><span>数据存储</span><b>本机</b></div>";
+  }
+}
+function saveAccount(){
+  var a=getAcc();
+  a.nick=document.getElementById("nick").value.trim();
+  a.sign=document.getElementById("sign").value.trim();
+  if(!a.emoji){a.emoji="🙂"}
+  saveAcc(a);renderAcc();
+  alert("资料已保存\n数据只存在本机，没有上传任何服务器");
+  addExp(5);
+}
+function doLogin(){
+  var a=getAcc();
+  a.emoji=EMOJI[Math.floor(Math.random()*EMOJI.length)];
+  saveAcc(a);
+  var ae=document.getElementById("avaEmoji");
+  if(ae){ae.style.transform="scale(0.6) rotate(-15deg)";ae.style.transition="transform .5s cubic-bezier(.34,1.56,.64,1)";setTimeout(function(){ae.style.transform="scale(1) rotate(0)"},60)}
+  addExp(10);
+  setTimeout(function(){renderAcc();alert("已登录（假装）\n头像已随机更换，数据仍是本机")},520);
+}
+function addExp(n){
+  var a=getAcc();a.exp+=n;saveAcc(a);renderAcc();
+}
+function clearAll(){
+  if(!confirm("确定清除全部本机数据？记事、账号都会没")){return}
+  try{localStorage.removeItem("xg_notes");localStorage.removeItem("xg_acc");localStorage.removeItem("xg_font");localStorage.removeItem("xg_best")}catch(e){}
+  renderNotes();renderAcc();
+  alert("已清除");
+}
+</script>
+<!--JS_PART5-->
+<script>
+/* ---------- 游戏大厅 ---------- */
+var GAMES=[
+  {id:"snake",ic:"🐍",n:"贪吃蛇",d:"方向键/滑动"},
+  {id:"g2048",ic:"🔢",n:"2048",d:"合并数字"},
+  {id:"breakout",ic:"🧱",n:"打砖块",d:"挡板弹球"},
+  {id:"mine",ic:"💣",n:"扫雷",d:"9x9 十雷"},
+  {id:"memory",ic:"🃏",n:"记忆翻牌",d:"配对消除"},
+  {id:"gomoku",ic:"⚫",n:"五子棋",d:"人机对战"},
+  {id:"slide",ic:"🧩",n:"数字华容道",d:"3x3 排序"},
+  {id:"tetris",ic:"🟦",n:"俄罗斯方块",d:"消行得分"}
+];
+function renderGames(){
+  var el=document.getElementById("gameGrid");if(!el){return}
+  var h="";
+  for(var i=0;i<GAMES.length;i++){
+    var g=GAMES[i];
+    h+="<div class=\"gamecard\" onclick=\"openGame(\""+g.id+"\")\"><div class=\"gi\">"+g.ic+"</div><div class=\"gn\">"+g.n+"</div><div class=\"gd\">"+g.d+"</div></div>";
+  }
+  el.innerHTML=h;
+}
+function getBest(id){var b=LS.get("xg_best",{});return b[id]||0}
+function setBest(id,v){var b=LS.get("xg_best",{});if(v>(b[id]||0)){b[id]=v;LS.set("xg_best",b)}}
+var _timers=[];
+function clearTimers(){for(var i=0;i<_timers.length;i++){clearInterval(_timers[i]);clearTimeout(_timers[i])}_timers=[]}
+function openGame(id){
+  clearTimers();
+  var g=null;for(var i=0;i<GAMES.length;i++){if(GAMES[i].id===id){g=GAMES[i]}}
+  document.getElementById("gTitle").textContent=g?g.n:"游戏";
+  document.getElementById("gameStage").classList.add("on");
+  var body=document.getElementById("gBody");body.innerHTML="";
+  if(id==="snake"){startSnake(body)}
+  else if(id==="g2048"){start2048(body)}
+  else if(id==="breakout"){startBreakout(body)}
+  else if(id==="mine"){startMine(body)}
+  else if(id==="memory"){startMemory(body)}
+  else if(id==="gomoku"){startGomoku(body)}
+  else if(id==="slide"){startSlide(body)}
+  else if(id==="tetris"){startTetris(body)}
+}
+function closeGame(){clearTimers();document.getElementById("gameStage").classList.remove("on");document.getElementById("gBody").innerHTML=""}
+</script>
+<!--GAME2-->
+<script>
+/* ===== 1. 贪吃蛇 ===== */
+function startSnake(root){
+  root.innerHTML="<div class=\"score\">得分 <span id=\"sScore\">0</span> · 最高 <span id=\"sBest\">"+getBest("snake")+"</span></div>"+
+    "<canvas id=\"sCv\" width=\"300\" height=\"300\"></canvas>"+
+    "<div style=\"display:flex;gap:8px;margin-top:6px\">"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"snakeTurn(-1,0)\">←</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"snakeTurn(0,-1)\">↑</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"snakeTurn(0,1)\">↓</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"snakeTurn(1,0)\">→</button>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 16px\" onclick=\"startSnake(document.getElementById(\"gBody\"))\">重开</button></div>";
+  var cv=document.getElementById("sCv"),cx=cv.getContext("2d");
+  var N=15,U=300/N;
+  var sn=[{x:7,y:7}],dir={x:1,y:0},food={x:10,y:10},sc=0,dead=false;
+  window.snakeTurn=function(dx,dy){if(dead){return}if(dir.x+dx===0&&dir.y+dy===0){return}dir={x:dx,y:dy}};
+  var sx=0,sy=0;
+  cv.ontouchstart=function(e){e.preventDefault();var t=e.touches[0];sx=t.clientX;sy=t.clientY};
+  cv.ontouchend=function(e){var t=e.changedTouches[0];var dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>Math.abs(dy)){snakeTurn(dx>0?1:-1,0)}else{snakeTurn(0,dy>0?1:-1)}};
+  function putFood(){food={x:Math.floor(Math.random()*N),y:Math.floor(Math.random()*N)}}
+  function draw(){
+    cx.clearRect(0,0,300,300);
+    cx.fillStyle="rgba(255,255,255,.08)";cx.fillRect(0,0,300,300);
+    cx.fillStyle="#EF4444";cx.beginPath();cx.arc(food.x*U+U/2,food.y*U+U/2,U/2-2,0,6.28);cx.fill();
+    for(var i=0;i<sn.length;i++){
+      cx.fillStyle=i===0?"#60A5FA":"#3B82F6";
+      cx.fillRect(sn[i].x*U+1,sn[i].y*U+1,U-2,U-2);
+    }
+  }
+  var t=setInterval(function(){
+    if(dead){return}
+    var hx=sn[0].x+dir.x,hy=sn[0].y+dir.y;
+    if(hx<0||hy<0||hx>=N||hy>=N){dead=true;over();return}
+    for(var i=0;i<sn.length;i++){if(sn[i].x===hx&&sn[i].y===hy){dead=true;over();return}}
+    sn.unshift({x:hx,y:hy});
+    if(hx===food.x&&hy===food.y){sc+=10;document.getElementById("sScore").textContent=sc;putFood()}else{sn.pop()}
+    draw();
+  },160);
+  _timers.push(t);
+  function over(){
+    clearInterval(t);
+    setBest("snake",sc);
+    document.getElementById("sBest").textContent=getBest("snake");
+    cx.fillStyle="rgba(0,0,0,.7)";cx.fillRect(0,0,300,300);
+    cx.fillStyle="#fff";cx.font="bold 22px sans-serif";cx.textAlign="center";
+    cx.fillText("游戏结束",150,140);cx.font="14px sans-serif";cx.fillText("得分 "+sc,150,170);
+    addExp(3);
+  }
+  putFood();draw();
+}
+</script>
+<!--GAME3-->
+<script>
+/* ===== 2. 2048 ===== */
+function start2048(root){
+  root.innerHTML="<div class=\"score\">得分 <span id=\"tScore\">0</span> · 最高 <span id=\"tBest\">"+getBest("g2048")+"</span></div>"+
+    "<div id=\"g2048box\" style=\"width:300px;height:300px;background:rgba(255,255,255,.09);border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);grid-gap:8px\"></div>"+
+    "<div style=\"display:flex;gap:8px;margin-top:10px\">"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"m2048(\"u\")\">↑</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"m2048(\"l\")\">←</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"m2048(\"d\")\">↓</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:9px 16px\" onclick=\"m2048(\"r\")\">→</button>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 16px\" onclick=\"start2048(document.getElementById(\"gBody\"))\">重开</button></div>";
+  var G=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  var sc=0;
+  function add(){
+    var empty=[];for(var i=0;i<4;i++){for(var j=0;j<4;j++){if(G[i][j]===0){empty.push([i,j])}}}
+    if(empty.length===0){return}
+    var p=empty[Math.floor(Math.random()*empty.length)];
+    G[p[0]][p[1]]=Math.random()<0.9?2:4;
+  }
+  function colors(v){
+    var m={2:"#374151",4:"#4B5563",8:"#F59E0B",16:"#F97316",32:"#EF4444",64:"#DC2626",128:"#8B5CF6",256:"#7C3AED",512:"#3B82F6",1024:"#2563EB",2048:"#10B981"};
+    return m[v]||"#111827";
+  }
+  function draw(){
+    var box=document.getElementById("g2048box");if(!box){return}
+    var h="";
+    for(var i=0;i<4;i++){for(var j=0;j<4;j++){
+      var v=G[i][j];
+      h+="<div style=\"background:"+(v?colors(v):"rgba(255,255,255,.07)")+";border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:"+(v>999?15:20)+"px;color:#fff\">"+(v?v:"")+"</div>";
+    }}
+    box.innerHTML=h;
+    var s=document.getElementById("tScore");if(s){s.textContent=sc}
+  }
+  function slide(row){
+    var a=[];for(var i=0;i<4;i++){if(row[i]){a.push(row[i])}}
+    var out=[];
+    for(var j=0;j<a.length;j++){
+      if(a[j]===a[j+1]){out.push(a[j]*2);sc+=a[j]*2;j++}else{out.push(a[j])}
+    }
+    while(out.length<4){out.push(0)}
+    return out;
+  }
+  function move(dir){
+    var before=JSON.stringify(G);
+    if(dir==="l"||dir==="r"){
+      for(var i=0;i<4;i++){
+        var row=G[i].slice();
+        if(dir==="r"){row.reverse()}
+        row=slide(row);
+        if(dir==="r"){row.reverse()}
+        G[i]=row;
+      }
+    }else{
+      for(var j=0;j<4;j++){
+        var col=[G[0][j],G[1][j],G[2][j],G[3][j]];
+        if(dir==="d"){col.reverse()}
+        col=slide(col);
+        if(dir==="d"){col.reverse()}
+        for(var k=0;k<4;k++){G[k][j]=col[k]}
+      }
+    }
+    if(JSON.stringify(G)!==before){add();draw()}
+    check();
+  }
+  window.m2048=move;
+  function check(){
+    for(var i=0;i<4;i++){for(var j=0;j<4;j++){
+      if(G[i][j]===0){return}
+      if(j<3&&G[i][j]===G[i][j+1]){return}
+      if(i<3&&G[i][j]===G[i+1][j]){return}
+    }}
+    setBest("g2048",sc);
+    document.getElementById("tBest").textContent=getBest("g2048");
+    alert("无法移动了！得分 "+sc);
+    addExp(3);
+  }
+  var sx=0,sy=0;
+  var box=document.getElementById("g2048box");
+  box.ontouchstart=function(e){var t=e.touches[0];sx=t.clientX;sy=t.clientY};
+  box.ontouchend=function(e){var t=e.changedTouches[0];var dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)<20&&Math.abs(dy)<20){return}if(Math.abs(dx)>Math.abs(dy)){move(dx>0?"r":"l")}else{move(dy>0?"d":"u")}};
+  add();add();draw();
+}
+</script>
+<!--GAME4-->
+<script>
+/* ===== 3. 打砖块 ===== */
+function startBreakout(root){
+  root.innerHTML="<div class=\"score\">得分 <span id=\"bScore\">0</span> · 最高 <span id=\"bBest\">"+getBest("breakout")+"</span></div>"+
+    "<canvas id=\"bCv\" width=\"300\" height=\"340\"></canvas>"+
+    "<div style=\"font-size:11px;opacity:.5;margin-top:8px;text-align:center\">左右滑动屏幕移动挡板</div>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 20px;margin-top:8px\" onclick=\"startBreakout(document.getElementById(\"gBody\"))\">重开</button>";
+  var cv=document.getElementById("bCv"),cx=cv.getContext("2d");
+  var W=300,H=340;
+  var px=120,pw=60,y=H-24,ph=8;
+  var bx=150,by=200,vx=2.2,vy=-2.6,r=5;
+  var rows=4,cols=7,bw=W/cols,bh=16,blocks=[],sc=0,dead=false;
+  for(var i=0;i<rows;i++){for(var j=0;j<cols;j++){blocks.push({x:j*bw,y:40+i*bh,w:bw-2,h:bh-3,on:true})}}
+  cv.ontouchmove=function(e){e.preventDefault();var t=e.touches[0];var r2=cv.getBoundingClientRect();px=t.clientX-r2.left-pw/2;if(px<0){px=0}if(px>W-pw){px=W-pw}};
+  function loop(){
+    if(dead){return}
+    cx.fillStyle="#0B1020";cx.fillRect(0,0,W,H);
+    bx+=vx;by+=vy;
+    if(bx<r||bx>W-r){vx=-vx;bx=bx<r?r:W-r}
+    if(by<r){vy=-vy;by=r}
+    if(by>y-r&&by<y+ph&&bx>px&&bx<px+pw){vy=-vy;vy-=0.06;by=y-r}
+    if(by>H){dead=true;gameover();return}
+    cx.beginPath();cx.arc(bx,by,r,0,6.28);cx.fillStyle="#F59E0B";cx.fill();
+    cx.fillStyle="#60A5FA";cx.fillRect(px,y,pw,ph);
+    for(var i=0;i<blocks.length;i++){
+      var b=blocks[i];
+      if(!b.on){continue}
+      cx.fillStyle="#8B5CF6";cx.fillRect(b.x,b.y,b.w,b.h);
+      if(bx>b.x&&bx<b.x+b.w&&by> b.y&&by<b.y+b.h){b.on=false;vy=-vy;sc+=5;document.getElementById("bScore").textContent=sc}
+    }
+    var left=0;for(var k=0;k<blocks.length;k++){if(blocks[k].on){left++}}
+    if(left===0){dead=true;setBest("breakout",sc);alert("通关！得分 "+sc);addExp(8);return}
+  }
+  var t=setInterval(loop,16);_timers.push(t);
+  function gameover(){
+    setBest("breakout",sc);
+    cx.fillStyle="rgba(0,0,0,.75)";cx.fillRect(0,0,W,H);
+    cx.fillStyle="#fff";cx.font="bold 22px sans-serif";cx.textAlign="center";
+    cx.fillText("游戏结束",W/2,H/2);cx.font="14px sans-serif";cx.fillText("得分 "+sc,W/2,H/2+28);
+    addExp(3);
+  }
+}
+</script>
+<!--GAME5-->
+<script>
+/* ===== 4. 扫雷 ===== */
+function startMine(root){
+  root.innerHTML="<div class=\"score\">剩余雷数 <span id=\"mLeft\">10</span> · 状态 <span id=\"mSt\">进行中</span></div>"+
+    "<div id=\"mineBox\" style=\"display:grid;grid-template-columns:repeat(9,1fr);gap:3px;width:300px\"></div>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 20px;margin-top:12px\" onclick=\"startMine(document.getElementById(\"gBody\"))\">重开</button>";
+  var N=9,MINES=10;
+  var M=[],opened=[],flagged=[],over=false;
+  for(var i=0;i<N;i++){M.push([]);opened.push([]);flagged.push([]);for(var j=0;j<N;j++){M[i].push(0);opened[i].push(false);flagged[i].push(false)}}
+  var placed=0;
+  while(placed<MINES){var x=Math.floor(Math.random()*N),y=Math.floor(Math.random()*N);if(M[y][x]!==-1){M[y][x]=-1;placed++}}
+  for(var a=0;a<N;a++){for(var b=0;b<N;b++){
+    if(M[b][a]===-1){continue}
+    var c=0;
+    for(var dx=-1;dx<=1;dx++){for(var dy=-1;dy<=1;dy++){
+      var nx=a+dx,ny=b+dy;
+      if(nx>=0&&ny>=0&&nx<N&&ny<N&&M[ny][nx]===-1){c++}
+    }}
+    M[b][a]=c;
+  }}
+  function draw(){
+    var box=document.getElementById("mineBox");if(!box){return}
+    var h="";
+    for(var b=0;b<N;b++){for(var a=0;a<N;a++){
+      var v=M[b][a],op=opened[b][a],fl=flagged[b][a];
+      var bg="rgba(255,255,255,.13)",tx="";
+      if(op){bg="rgba(255,255,255,.05)";tx=v===-1?"💣":(v>0?v:"")}
+      if(fl){tx="🚩"}
+      var col=v===1?"#60A5FA":v===2?"#10B981":v===3?"#F59E0B":"#EF4444";
+      h+="<div onclick=\"mineOpen("+a+","+b+")\" oncontextmenu=\"return false\" style=\"aspect-ratio:1;background:"+bg+";border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:"+col+"\">"+tx+"</div>";
+    }}
+    box.innerHTML=h;
+  }
+  window.mineOpen=function(a,b){
+    if(over||opened[b][a]){return}
+    opened[b][a]=true;
+    if(M[b][a]===-1){over=true;
+      for(var i=0;i<N;i++){for(var j=0;j<N;j++){if(M[i][j]===-1){opened[i][j]=true}}}
+      document.getElementById("mSt").textContent="踩雷💥";
+      draw();setTimeout(function(){alert("踩到雷了！");addExp(1)},300);return}
+    if(M[b][a]===0){
+      for(var dx=-1;dx<=1;dx++){for(var dy=-1;dy<=1;dy++){
+        var nx=a+dx,ny=b+dy;
+        if(nx>=0&&ny>=0&&nx<N&&ny<N&&!opened[ny][nx]&&M[ny][nx]!==-1){mineOpen(nx,ny)}
+      }}
+    }
+    checkWin();
+    draw();
+  };
+  function checkWin(){
+    var c=0;
+    for(var i=0;i<N;i++){for(var j=0;j<N;j++){if(opened[i][j]){c++}}}
+    if(c>=N*N-MINES){over=true;document.getElementById("mSt").textContent="全部扫完🎉";addExp(8);setTimeout(function(){alert("扫雷成功！")},200)}
+  }
+  draw();
+}
+</script>
+<!--GAME6-->
+<script>
+/* ===== 5. 记忆翻牌 ===== */
+function startMemory(root){
+  root.innerHTML="<div class=\"score\">步数 <span id=\"mmStep\">0</span> · 配对 <span id=\"mmPair\">0</span>/8</div>"+
+    "<div id=\"memBox\" style=\"display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:300px\"></div>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 20px;margin-top:12px\" onclick=\"startMemory(document.getElementById(\"gBody\"))\">重开</button>";
+  var ICONS=["🍎","🍌","🍇","🍒","🍉","🥝","🍑","🥥"];
+  var deck=ICONS.concat(ICONS);
+  for(var i=deck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=deck[i];deck[i]=deck[j];deck[j]=tmp}
+  var flipped=[],matched=[],step=0,pair=0,lock=false;
+  function draw(){
+    var box=document.getElementById("memBox");if(!box){return}
+    var h="";
+    for(var i=0;i<16;i++){
+      var show=flipped.indexOf(i)>=0||matched.indexOf(i)>=0;
+      var bg=show?"rgba(255,255,255,.16)":"linear-gradient(135deg,#3B82F6,#8B5CF6)";
+      h+="<div onclick=\"memTap("+i+")\" style=\"aspect-ratio:1;background:"+bg+";border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer\">"+(show?deck[i]:"")+"</div>";
+    }
+    box.innerHTML=h;
+  }
+  window.memTap=function(i){
+    if(lock||flipped.indexOf(i)>=0||matched.indexOf(i)>=0){return}
+    flipped.push(i);
+    if(flipped.length===2){
+      step++;
+      document.getElementById("mmStep").textContent=step;
+      var a=flipped[0],b=flipped[1];
+      if(deck[a]===deck[b]){
+        matched.push(a);matched.push(b);flipped=[];pair++;
+        document.getElementById("mmPair").textContent=pair;
+        draw();
+        if(pair===8){addExp(10);setTimeout(function(){alert("全部配对成功！步数 "+step);setBest("memory",Math.max(0,100-step))},250)}
+        return;
+      }else{
+        lock=true;draw();
+        setTimeout(function(){flipped=[];lock=false;draw()},650);
+        return;
+      }
+    }
+    draw();
+  };
+  draw();
+}
+</script>
+<!--GAME7-->
+<script>
+/* ===== 6. 五子棋（人机） ===== */
+function startGomoku(root){
+  root.innerHTML="<div class=\"score\">你 ● 先手 · <span id=\"gkSt\">你的回合</span></div>"+
+    "<canvas id=\"gkCv\" width=\"300\" height=\"300\"></canvas>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 20px;margin-top:12px\" onclick=\"startGomoku(document.getElementById(\"gBody\"))\">重开</button>";
+  var cv=document.getElementById("gkCv"),cx=cv.getContext("2d");
+  var N=11,U=300/N;
+  var B=[];for(var i=0;i<N;i++){B.push([]);for(var j=0;j<N;j++){B[i].push(0)}}
+  var over=false,turn=1;
+  function draw(){
+    cx.fillStyle="#0B1020";cx.fillRect(0,0,300,300);
+    cx.strokeStyle="rgba(255,255,255,.22)";cx.lineWidth=1;
+    for(var i=0;i<N;i++){
+      cx.beginPath();cx.moveTo(U/2+i*U,U/2);cx.lineTo(U/2+i*U,300-U/2);cx.stroke();
+      cx.beginPath();cx.moveTo(U/2,U/2+i*U);cx.lineTo(300-U/2,U/2+i*U);cx.stroke();
+    }
+    for(var r=0;r<N;r++){for(var c=0;c<N;c++){
+      if(B[r][c]===0){continue}
+      cx.beginPath();cx.arc(U/2+c*U,U/2+r*U,U/2-3,0,6.28);
+      cx.fillStyle=B[r][c]===1?"#111":"#fff";cx.fill();
+      cx.strokeStyle=B[r][c]===1?"#666":"#333";cx.stroke();
+    }}
+  }
+  function win(r,c,p){
+    var dirs=[[0,1],[1,0],[1,1],[1,-1]];
+    for(var d=0;d<4;d++){
+      var cnt=1;
+      for(var s=1;s<5;s++){var nr=r+dirs[d][0]*s,nc=c+dirs[d][1]*s;if(nr<0||nc<0||nr>=N||nc>=N||B[nr][nc]!==p){break}cnt++}
+      for(var s2=1;s2<5;s2++){var nr2=r-dirs[d][0]*s2,nc2=c-dirs[d][1]*s2;if(nr2<0||nc2<0||nr2>=N||nc2>=N||B[nr2][nc2]!==p){break}cnt++}
+      if(cnt>=5){return true}
+    }
+    return false;
+  }
+  function aiMove(){
+    function tryDir(p){
+      for(var r=0;r<N;r++){for(var c=0;c<N;c++){
+        if(B[r][c]!==0){continue}
+        B[r][c]=p;
+        if(win(r,c,p)){B[r][c]=0;return {r:r,c:c}}
+        B[r][c]=0;
+      }}
+      return null;
+    }
+    var m=tryDir(2)||tryDir(1);
+    if(m){return m}
+    var best=null,bd=999;
+    for(var r=0;r<N;r++){for(var c=0;c<N;c++){
+      if(B[r][c]!==0){continue}
+      var d=Math.abs(r-5)+Math.abs(c-5);
+      if(d<bd){bd=d;best={r:r,c:c}}
+    }}
+    return best;
+  }
+  cv.onclick=function(e){
+    if(over||turn!==1){return}
+    var rc=cv.getBoundingClientRect();
+    var x=(e.clientX-rc.left)/rc.width*300,y=(e.clientY-rc.top)/rc.height*300;
+    var c=Math.round((x-U/2)/U),r=Math.round((y-U/2)/U);
+    if(r<0||c<0||r>=N||c>=N||B[r][c]!==0){return}
+    B[r][c]=1;draw();
+    if(win(r,c,1)){over=true;document.getElementById("gkSt").textContent="你赢了🎉";addExp(10);return}
+    turn=2;document.getElementById("gkSt").textContent="电脑回合…";
+    var t=setTimeout(function(){
+      var m=aiMove();
+      if(m){B[m.r][m.c]=2;draw()
+        if(win(m.r,m.c,2)){over=true;document.getElementById("gkSt").textContent="电脑赢了";addExp(2);return}
+      }
+      turn=1;document.getElementById("gkSt").textContent="你的回合";
+    },320);
+    _timers.push(t);
+  };
+  draw();
+}
+</script>
+<!--GAME8-->
+<script>
+/* ===== 7. 数字华容道 3x3 ===== */
+function startSlide(root){
+  root.innerHTML="<div class=\"score\">步数 <span id=\"slStep\">0</span></div>"+
+    "<div id=\"slBox\" style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:270px\"></div>"+
+    "<button class=\"btn\" style=\"width:auto;padding:9px 20px;margin-top:12px\" onclick=\"startSlide(document.getElementById(\"gBody\"))\">重开</button>";
+  var A=[1,2,3,4,5,6,7,8,0];
+  for(var i=A.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=A[i];A[i]=A[j];A[j]=t}
+  var step=0;
+  function draw(){
+    var box=document.getElementById("slBox");if(!box){return}
+    var h="";
+    for(var i=0;i<9;i++){
+      var v=A[i];
+      var bg=v?"rgba(255,255,255,.16)":"transparent";
+      h+="<div onclick=\"slTap("+i+")\" style=\"aspect-ratio:1;background:"+bg+";border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;cursor:pointer\">"+(v?v:"")+"</div>";
+    }
+    box.innerHTML=h;
+    document.getElementById("slStep").textContent=step;
+  }
+  window.slTap=function(i){
+    var z=A.indexOf(0);
+    var r1=Math.floor(i/3),c1=i%3,r2=Math.floor(z/3),c2=z%3;
+    if(Math.abs(r1-r2)+Math.abs(c1-c2)!==1){return}
+    A[z]=A[i];A[i]=0;step++;draw();
+    var ok=true;for(var k=0;k<8;k++){if(A[k]!==k+1){ok=false}}
+    if(ok&&A[8]===0){addExp(8);setTimeout(function(){alert("拼好啦！步数 "+step)},200)}
+  };
+  draw();
+}
+</script>
+<!--GAME9-->
+<script>
+/* ===== 8. 俄罗斯方块 ===== */
+function startTetris(root){
+  root.innerHTML="<div class=\"score\">得分 <span id=\"teScore\">0</span> · 消行 <span id=\"teLine\">0</span></div>"+
+    "<canvas id=\"teCv\" width=\"240\" height=\"400\"></canvas>"+
+    "<div style=\"display:flex;gap:10px;margin-top:10px\">"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:10px 18px\" onclick=\"teMove(-1)\">←</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:10px 18px\" onclick=\"teRot()\">⟳</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:10px 18px\" onclick=\"teMove(1)\">→</button>"+
+    "<button class=\"btn ghost\" style=\"width:auto;padding:10px 18px\" onclick=\"teDrop()\">↓</button>"+
+    "<button class=\"btn\" style=\"width:auto;padding:10px 18px\" onclick=\"startTetris(document.getElementById(\"gBody\"))\">重开</button></div>";
+  var cv=document.getElementById("teCv"),cx=cv.getContext("2d");
+  var CW=10,RW=20,U=24;
+  var SHAPES=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];
+  var COLS=["#60A5FA","#F59E0B","#8B5CF6","#EF4444","#10B981","#06B6D4","#F97316"];
+  var G=[];for(var i=0;i<RW;i++){G.push([]);for(var j=0;j<CW;j++){G[i].push(0)}}
+  var cur=null,sc=0,lines=0,over=false;
+  function newPiece(){
+    var idx=Math.floor(Math.random()*SHAPES.length);
+    cur={s:SHAPES[idx],c:COLS[idx],x:3,y:0};
+  }
+  function collide(p,ox,oy,sh){
+    var m=sh||p.s;
+    for(var r=0;r<m.length;r++){for(var c=0;c<m[r].length;c++){
+      if(!m[r][c]){continue}
+      var nx=p.x+c+ox,ny=p.y+r+oy;
+      if(nx<0||nx>=CW||ny>=RW){return true}
+      if(ny>=0&&G[ny][nx]){return true}
+    }}
+    return false;
+  }
+  function merge(){
+    for(var r=0;r<cur.s.length;r++){for(var c=0;c<cur.s[r].length;c++){
+      if(cur.s[r][c]&&cur.y+r>=0){G[cur.y+r][cur.x+c]=cur.c}
+    }}
+  }
+  function clearLines(){
+    for(var r=RW-1;r>=0;r--){
+      var full=true;
+      for(var c=0;c<CW;c++){if(!G[r][c]){full=false}}
+      if(full){G.splice(r,1);G.unshift([]);for(var k=0;k<CW;k++){G[0].push(0)};lines++;sc+=10;r++}
+    }
+  }
+  function draw(){
+    cx.fillStyle="#0B1020";cx.fillRect(0,0,240,400);
+    for(var r=0;r<RW;r++){for(var c=0;c<CW;c++){
+      if(G[r][c]){cx.fillStyle=G[r][c];cx.fillRect(c*U+1,r*U+1,U-2,U-2)}
+    }}
+    if(cur){
+      for(var rr=0;rr<cur.s.length;rr++){for(var cc=0;cc<cur.s[rr].length;cc++){
+        if(cur.s[rr][cc]&&cur.y+rr>=0){cx.fillStyle=cur.c;cx.fillRect((cur.x+cc)*U+1,(cur.y+rr)*U+1,U-2,U-2)}
+      }}
+    }
+    var s=document.getElementById("teScore");if(s){s.textContent=sc}
+    var l=document.getElementById("teLine");if(l){l.textContent=lines}
+  }
+  function step(){
+    if(over){return}
+    if(!collide(cur,0,1)){cur.y++}
+    else{merge();clearLines();newPiece();if(collide(cur,0,0)){over=true;setBest("tetris",sc);setTimeout(function(){alert("游戏结束！得分 "+sc);addExp(5)},200)}}
+    draw();
+  }
+  window.teMove=function(d){if(!over&&!collide(cur,d,0)){cur.x+=d;draw()}};
+  window.teRot=function(){
+    if(over){return}
+    var m=cur.s,n=m.length,w=m[0].length;
+    var nm=[];for(var i=0;i<w;i++){nm.push([]);for(var j=0;j<n;j++){nm[i].push(m[n-1-j][i])}}
+    if(!collide(cur,0,0,nm)){cur.s=nm;draw()}
+  };
+  window.teDrop=function(){if(over){return}while(!collide(cur,0,1)){cur.y++}step()};
+  newPiece();draw();
+  var t=setInterval(step,620);_timers.push(t);
+}
+</script>
+<!--INIT-->
+<script>
+/* ---------- 启动初始化 ---------- */
+function boot(){
+  try{
+    var f=LS.get("xg_font","cn");
+    setFont(f);
+    renderNotes();
+    renderAcc();
+    renderGames();
+    renderWeather();
+    tick();
+    /* 天气每 30 分钟刷新一次 */
+    setInterval(renderWeather,1800000);
+    console.log("小光 V1 启动完成");
+  }catch(e){
+    console.log("启动异常:"+e);
+    /* 即使出错也保证主界面可用 */
+    try{go("weather");renderGames()}catch(e2){}
+  }
+}
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot)}else{boot()}
+</script>
+</body>
+</html>
