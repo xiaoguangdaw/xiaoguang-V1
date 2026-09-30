@@ -1,4 +1,4 @@
-package com.auto.xiaoguang
+package com.auto.xiaoguang2
 
 import android.annotation.SuppressLint
 import android.os.Bundle
